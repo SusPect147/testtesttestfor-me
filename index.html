@@ -3,118 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Slot Machine228</title>
+    <title>Оплата звёздами</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             height: 100vh;
-            background: #e0ddddde;
-            overflow: hidden;
-            user-select: none;
+            margin: 0;
+            background-color: #f8f8f8;
         }
-
-        .ticket-button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: #0078d7;
-            color: #fff;
-            font-size: 16px;
-            padding: 10px 20px;
+        .pay-button {
+            padding: 15px 30px;
+            font-size: 18px;
+            color: white;
+            background-color: #4CAF50;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: background 0.3s;
+            transition: all 0.3s;
         }
-
-        .ticket-button:hover {
-            background-color: #005fa3;
-        }
-
-        .ticket-display {
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            align-items: center;
-        }
-
-        .ticket-display img {
-            width: 70px;
-            height: auto;
-            margin-right: 10px;
-        }
-
-        .ticket-display span {
-            font-size: 50px;
-            font-weight: bold;
+        .pay-button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
         }
     </style>
 </head>
 <body>
+    <button class="pay-button" id="payButton">Оплатить 20 звёзд</button>
 
-<div class="ticket-display">
-    <img src="ticket.png" alt="Ticket Icon">
-    <span id="ticket-counter">1000</span>
-</div>
+    <script>
+        const tg = window.Telegram.WebApp; // Инициализация Telegram WebApp
+        tg.expand(); // Развернуть мини-приложение на весь экран
 
-<!-- Кнопка для доната -->
-<button class="ticket-button" id="donate-button">Buy Tickets</button>
-
-<script>
-    let tickets = 1000;
-    const ticketCounter = document.getElementById('ticket-counter');
-    const donateButton = document.getElementById('donate-button');
-
-    function updateTickets(amount) {
-        tickets += amount;
-        ticketCounter.textContent = tickets;
-    }
-
-    donateButton.addEventListener('click', async () => {
-        // Проверяем, поддерживает ли Telegram Web App API
-        if (typeof Telegram === 'undefined' || !Telegram.WebApp) {
-            alert('Telegram Web App API is not available');
-            return;
-        }
-
-        const webApp = Telegram.WebApp;
-
-        try {
-            // Открытие меню доната через Telegram
-            const result = await webApp.openInvoice({
-                title: 'Buy 1M Tickets',
-                description: 'Get 1M tickets for 20 stars',
-                payload: 'buy_1m_tickets',
-                provider_token: '<coconutslot.com>', // Укажите токен вашего провайдера
-                currency: 'USD',
-                prices: [{
-                    label: '1M Tickets',
-                    amount: 2000, // Цена в минимальных единицах (например, 2000 = $20.00)
-                }]
-            });
-
-            // Если пользователь успешно оплатил
-            if (result.status === 'paid') {
-                updateTickets(1000000); // Начисляем тикеты
-                alert('Purchase successful! 1M tickets added.');
+        document.getElementById('payButton').addEventListener('click', () => {
+            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                tg.showConfirm("Вы уверены, что хотите оплатить 20 звёзд?")
+                    .then(() => {
+                        // Вызов метода для создания платёжного запроса
+                        tg.requestInvoice({
+                            "title": "Пожертвование",
+                            "description": "Оплата 20 звёзд за поддержку проекта",
+                            "payload": "donate_20_stars", // полезная нагрузка для сервера
+                            "currency": "stars",
+                            "prices": [{"label": "Stars", "amount": 20}]
+                        });
+                    })
+                    .catch(() => console.log("Платёж отменён"));
             } else {
-                updateTickets(-1); // Списываем 1 тикет в случае отказа
-                alert('Purchase canceled. 1 ticket deducted.');
+                alert("Не удалось инициализировать Telegram WebApp.");
             }
-        } catch (error) {
-            console.error('Error during purchase:', error);
-            alert('An error occurred. Please try again later.');
-        }
-    });
-</script>
-
+        });
+    </script>
 </body>
 </html>
