@@ -40,21 +40,27 @@
         tg.expand(); // Развернуть мини-приложение на весь экран
 
         document.getElementById('payButton').addEventListener('click', () => {
+            // Проверяем, что пользователь инициализировал WebApp
             if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
                 tg.showConfirm("Вы уверены, что хотите оплатить 20 звёзд?")
                     .then(() => {
-                        // Вызов метода для создания платёжного запроса
+                        // Вызов встроенного окна для оплаты
                         tg.requestInvoice({
-                            "title": "Пожертвование",
-                            "description": "Оплата 20 звёзд за поддержку проекта",
-                            "payload": "donate_20_stars", // полезная нагрузка для сервера
-                            "currency": "stars",
-                            "prices": [{"label": "Stars", "amount": 20}]
+                            // Параметры платежа
+                            name: "donation_20_stars",
+                            description: "Оплата 20 звёзд за поддержку проекта",
+                            payload: "donate_20_stars", // Полезная нагрузка
+                            currency: "stars",         // Валюта "stars" (Telegram)
+                            prices: [{ label: "20 Stars", amount: 20 }],
+                            // Debug для проверки ошибки
+                        }).catch(err => {
+                            console.error("Ошибка при вызове requestInvoice:", err);
+                            tg.showAlert("Ошибка: " + err.message);
                         });
                     })
-                    .catch(() => console.log("Платёж отменён"));
+                    .catch(() => console.log("Платёж отменён пользователем."));
             } else {
-                alert("Не удалось инициализировать Telegram WebApp.");
+                tg.showAlert("Ошибка: Не удалось инициализировать WebApp.");
             }
         });
     </script>
