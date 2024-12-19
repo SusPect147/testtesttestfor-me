@@ -3,66 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Оплата звёздами</title>
+    <title>Stars Donation</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f8f8f8;
-        }
-        .pay-button {
-            padding: 15px 30px;
-            font-size: 18px;
-            color: white;
-            background-color: #4CAF50;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s;
-        }
-        .pay-button:hover {
-            background-color: #45a049;
-            transform: translateY(-2px);
-        }
-    </style>
 </head>
 <body>
-    <button class="pay-button" id="payButton">Оплатить 20 звёзд</button>
+    <h1>Покупка Stars</h1>
+    <button id="buyStars">Купить 50 Stars</button>
 
     <script>
-        const tg = window.Telegram.WebApp; // Инициализация Telegram WebApp
-        tg.expand(); // Развернуть мини-приложение на весь экран
+        // Проверяем, доступен ли Telegram Web App API
+        const tg = window.Telegram.WebApp;
+        tg.ready();
 
-        document.getElementById('payButton').addEventListener('click', () => {
-            // Проверяем, что пользователь инициализировал WebApp
-            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-                tg.showConfirm("Вы уверены, что хотите оплатить 20 звёзд?")
-                    .then(() => {
-                        // Вызов встроенного окна для оплаты
-                        tg.requestInvoice({
-                            // Параметры платежа
-                            name: "donation_20_stars",
-                            description: "Оплата 20 звёзд за поддержку проекта",
-                            payload: "donate_20_stars", // Полезная нагрузка
-                            currency: "stars",         // Валюта "stars" (Telegram)
-                            prices: [{ label: "20 Stars", amount: 20 }],
-                            // Debug для проверки ошибки
-                        }).catch(err => {
-                            console.error("Ошибка при вызове requestInvoice:", err);
-                            tg.showAlert("Ошибка: " + err.message);
-                        });
-                    })
-                    .catch(() => console.log("Платёж отменён пользователем."));
-            } else {
-                tg.showAlert("Ошибка: Не удалось инициализировать WebApp.");
-            }
+        const buyStarsButton = document.getElementById("buyStars");
+
+        buyStarsButton.addEventListener("click", () => {
+            tg.initPayButton({
+                bot_username: "CoconutClickerbot", // Имя вашего бота
+                is_test: true, 
+                amount: 20, 
+                payload: "stars_purchase_50", // Ваш идентификатор покупки
+                description: "Покупка 50 Stars",
+                currency: "stars",
+                callback: (result) => {
+                    if (result.success) {
+                        alert("Stars успешно отправлены!");
+                    } else {
+                        alert("Произошла ошибка при отправке Stars.");
+                    }
+                }
+            });
         });
     </script>
 </body>
 </html>
+
